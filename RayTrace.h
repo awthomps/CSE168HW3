@@ -34,64 +34,45 @@ public:
 			return false;
 		}
 		else {
-			std::vector<ShadowRay> shadowRays(Scn->GetNumLights());
-			for (unsigned int i = 0; i < Scn->GetNumLights(); ++i) {
-				shadowRays[i].hasBeenSet = false;
-			}
-			unsigned int shadowIndex = 0;
 			for (unsigned int i = 0; i < Scn->GetNumLights(); ++i) {
 				//declare locals:
-				Color lightColor;
+				Color lightColor, shade;
 				Vector3 toLight, lightPos, in, out;
 				Intersection obstruction;
+				Ray toLightRay;
 
 				//compute lighting with this light 
 				float intensity = Scn->GetLight(i).Illuminate(hit.Position, lightColor, toLight, lightPos);
 
 				if (intensity == 0 || hit.Normal.Opposing(toLight)) continue;
 
-				shadowRays[shadowIndex].ray.Direction = toLight;
-				shadowRays[shadowIndex].ray.Origin = hit.Position;
-				shadowRays[shadowIndex].hasBeenSet = true;
-				shadowRays[shadowIndex].lightPos = lightPos;
-				shadowRays[shadowIndex].intensity = intensity;
-				shadowRays[shadowIndex].lightColor = lightColor;
-				++shadowIndex;
-			}
-
-			if (depth == MAX_DEPTH) {
-				//delete shadowRays; // clean
-				return true;
-			}
-
-			shadowIndex = 0;
-			while (shadowIndex < shadowRays.size() && shadowRays[shadowIndex].hasBeenSet) {
 				//check if light is blocked:
+				toLightRay.Direction = toLight;
+				toLightRay.Origin = hit.Position;
 
-				bool hasObstruction = false;
-				if (Scn->Intersect(shadowRays[shadowIndex].ray, shadowRays[shadowIndex].obstruction)) {
+				bool shadowRayBlocked = false;
+				if (Scn->Intersect(toLightRay, obstruction)) {
 					//check if the light is obstructed:
-					float obstructionDistance = (shadowRays[shadowIndex].obstruction.Position - hit.Position).Magnitude();
-					float lightDistance = (shadowRays[shadowIndex].lightPos - hit.Position).Magnitude();
+					float obstructionDistance = (obstruction.Position - hit.Position).Magnitude();
+					float lightDistance = (lightPos - hit.Position).Magnitude();
 					if (obstructionDistance < lightDistance) {
 						//obstruction blocking light so continue
-						hasObstruction = true;
+						shadowRayBlocked = true;
 					}
 				}
 
-				if (!hasObstruction) {
-					Color shade = shadowRays[shadowIndex].lightColor;
-					float dotResult = (shadowRays[shadowIndex].ray.Direction).Dot(hit.Normal);
-					shade.Scale(((dotResult < 0) ? 0 : dotResult) * shadowRays[shadowIndex].intensity);
+				if (!shadowRayBlocked) {
+					Color shade = lightColor;
+					float dotResult = (toLight).Dot(hit.Normal);
+					shade.Scale(((dotResult < 0) ? 0 : dotResult) * intensity);
 
 					//add this lighting to the pixel
 					hit.Shade.Add(shade);
 				}
-				++shadowIndex; //increment the shadow ray index
 			}
-			
-			//clean up:
-			//delete[] shadowRays;
+
+			if (depth == MAX_DEPTH) return true;
+
 			return true;
 		}
 	}
