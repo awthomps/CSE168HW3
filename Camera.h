@@ -10,6 +10,7 @@
 #include "Scene.h"
 #include "Material.h"
 #include "StopWatch.h"
+#include "RayTrace.h"
 #include <iostream>
 
 class Camera
@@ -41,6 +42,7 @@ private:
 	float rightDelta;
 	float downDelta;
 	StopWatch watch;
+	RayTrace rayTrace;
 };
 
 #endif

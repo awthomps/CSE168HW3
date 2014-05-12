@@ -37,6 +37,9 @@ public:
 	float Distance2(const Vector3 &a) const						{return (x-a.x)*(x-a.x)+(y-a.y)*(y-a.y)+(z-a.z)*(z-a.z);}
 	void Lerp(float t,const Vector3 &a,const Vector3 &b)		{float s=1.0f-t; x=s*a.x+t*b.x; y=s*a.y+t*b.y; z=s*a.z+t*b.z;}
 
+	//checks if two vectors are facing away from each other
+	bool Opposing(const Vector3 &a)								{ return PI / 2.0 < acos(Dot(a) / (Magnitude() * a.Magnitude()));}
+
 	// Operator overloads
 	Vector3 operator+(const Vector3 &a) const					{return Vector3(x+a.x,y+a.y,z+a.z);}
 	const Vector3 &operator+=(const Vector3 &a)					{x+=a.x; y+=a.y; z+=a.z; return *this;}

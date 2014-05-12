@@ -39,7 +39,6 @@ void Camera::Render(Scene &s) {
 	//start timer:
 	watch.StartTime("Start Render.");
 
-
 	//create the corners of the rendering window:
 
 	//calculate modifiedB
@@ -93,46 +92,10 @@ void Camera::RenderPixel(int x, int y, Scene &s) {
 
 	Intersection hit;
 	hit.HitDistance = 1000;
-	if (!s.Intersect(sentRay, hit)) {
-		//no hits so skycolor:
-		BMP.SetPixel(x, y, s.GetSkyColor().ToInt());
-	}
-	else {
-		Color newColor = Color(0.0,0.0,0.0);
-		for (int i = 0; i < s.GetNumLights(); ++i) {
-			//declare locals:
-			Color lightColor, C;
-			Vector3 toLight, ItPos, in, out;
-			Ray toLightRay;
-			Intersection obstruction;
+	hit.Shade = Color(0.0, 0.0, 0.0);
+	rayTrace.SetScene(s);
+	rayTrace.TraceRay(sentRay, hit, 1);
 
-			//compute lighting with this light 
-			float intensity = s.GetLight(i).Illuminate(hit.Position, lightColor, toLight, ItPos);
-
-			//check if light is blocked:
-			toLightRay.Direction = toLight;
-			toLightRay.Origin = hit.Position;
-			bool hasObstruction = false;
-			if (s.Intersect(toLightRay, obstruction)) {
-				//check if the light is obstructed:
-				float obstructionDistance = (obstruction.Position - hit.Position).Magnitude();
-				float lightDistance = (ItPos - hit.Position).Magnitude();
-				if (obstructionDistance < lightDistance) {
-					//obstruction blocking light so continue
-					hasObstruction = true;
-				}
-			}
-
-			if (!hasObstruction) {
-				C = lightColor;
-				float dotResult = (toLight).Dot(hit.Normal);
-				C.Scale(((dotResult < 0) ? 0 : dotResult) * intensity);
-
-				//add this lighting to the pixel
-				newColor.Add(C);
-			}
-		}
-		//newColor.getInVector3().Print();
-		BMP.SetPixel(x, y, newColor.ToInt());
-	}
+	BMP.SetPixel(x, y, hit.Shade.ToInt());
+	
 }
