@@ -11,6 +11,7 @@
 #include "BoxTreeObject.h"
 #include "AshikhminMaterial.h"
 #include "LambertMaterial.h"
+#include <thread>
 
 void project1();
 void project2();
@@ -20,6 +21,7 @@ void project3();
 
 int main(int argc,char **argv) {
 	project3();
+	std::this_thread::sleep_for(std::chrono::seconds(20));
 	return 0;
 }
 
@@ -166,7 +168,7 @@ void project3() {
 	mtl[3].SetDiffuseColor(Color(1.0f, 0.1f, 0.1f));
 	mtl[3].SetDiffuseLevel(0.8f);
 	mtl[3].SetSpecularLevel(0.2f);
-	mtl[2].SetSpecularColor(Color(1.0f, 1.0f, 1.0f));
+	mtl[3].SetSpecularColor(Color(1.0f, 1.0f, 1.0f));
 	mtl[3].SetRoughness(1000.0f, 1000.0f);
 
 	// Load dragon mesh

@@ -66,6 +66,12 @@ public:
 					float dotResult = (toLight).Dot(hit.Normal);
 					shade.Scale(((dotResult < 0) ? 0 : dotResult) * intensity);
 
+
+					Ray reflectedRay;
+					reflectedRay.Origin = hit.Position;
+					if (hit.Mtl != NULL) {
+						hit.Mtl->ComputeReflectance(shade, sentRay.Direction, reflectedRay.Direction, hit);
+					}
 					//add this lighting to the pixel
 					hit.Shade.Add(shade);
 				}

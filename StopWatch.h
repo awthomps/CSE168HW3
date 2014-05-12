@@ -17,7 +17,10 @@ public:
 		std::cout << message << std::endl;
 	}
 	void CheckTime(std::string message) {
-		std::cout << message << std::endl << "Time elapsed: " << difftime(time(NULL), startTime) << " seconds." << std::endl;
+		int totalTime = difftime(time(NULL), startTime);
+		std::cout << message << std::endl;
+		if (totalTime < 60)  std::cout << "Time elapsed: " << totalTime << " seconds." << std::endl;
+		else std::cout << "Time elapsed: " << totalTime/60 << " minutes and "  << totalTime%60 << " seconds." << std::endl;
 	}
 
 
