@@ -76,6 +76,15 @@ bool Triangle::Intersect(const Ray &ray, Intersection &hit) const {
 	//std::cout << "hit" << std::endl;
 	hit.Normal.Normalize();
 	//hit.Normal.Print("After normalization");
+
+	//tangent:
+	hit.TangentU.Cross(Vector3::YAXIS, hit.Normal);
+	hit.TangentU.Normalize();
+	hit.TangentV.Cross(hit.Normal, hit.TangentU);
+
+	//material
+	if (Mtl != NULL) hit.Mtl = Mtl;
+
 	return true;
 }
 

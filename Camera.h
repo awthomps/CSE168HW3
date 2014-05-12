@@ -28,12 +28,13 @@ public:
 	void Render(Scene &s);
 	void SaveBitmap(char *filename);
 	void RenderPixel(int x, int y, Scene &s);
-	void SetSuperSample(int superSampleVal) { superSample = superSampleVal; }
+	void SetSuperSample(int superSampleVal) { superSampleNum = superSampleVal; }
 
 
 private:
 
-	int XRes, YRes, superSample;
+	int XRes, YRes;
+	unsigned int superSampleNum;
 	Matrix34 WorldMatrix;
 	float VerticalFOV;
 	float Aspect;

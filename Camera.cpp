@@ -2,6 +2,7 @@
 
 Camera::Camera()
 {
+	superSampleNum = 1;
 }
 
 Camera::~Camera()
@@ -91,11 +92,24 @@ void Camera::RenderPixel(int x, int y, Scene &s) {
 	sentRay.Direction.Normalize();
 
 	Intersection hit;
-	hit.HitDistance = 1000;
-	hit.Shade = Color(0.0, 0.0, 0.0);
 	rayTrace.SetScene(s);
-	rayTrace.TraceRay(sentRay, hit, 1);
 
-	BMP.SetPixel(x, y, hit.Shade.ToInt());
+	Vector3 accumColor = Vector3(0.0f, 0.0f, 0.0f);
+
+	//perform "supersampling":
+	for (unsigned int i = 0; i < superSampleNum; ++i) {
+		for (unsigned int j = 0; j < superSampleNum; ++j) {
+			hit.HitDistance = 1000;
+			hit.Shade = Color(0.0, 0.0, 0.0);
+
+			rayTrace.TraceRay(sentRay, hit, 1);
+			accumColor += hit.Shade.getInVector3();
+		}
+	}
+
+	//average accumulatedColor:
+	accumColor = accumColor / (float) (superSampleNum * superSampleNum);
+
+	BMP.SetPixel(x, y, Color(accumColor).ToInt());
 	
 }

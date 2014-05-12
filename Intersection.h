@@ -20,6 +20,7 @@ public:
 	float HitDistance;
 	Vector3 Position;
 	Vector3 Normal;
+	Vector3 TangentU, TangentV;
 	Material *Mtl;
 
 	// Shaded color

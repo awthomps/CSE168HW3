@@ -14,11 +14,12 @@
 
 void project1();
 void project2();
+void project3();
 
 ////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc,char **argv) {
-	project2();
+	project3();
 	return 0;
 }
 
