@@ -13,19 +13,31 @@ public:
 	}
 
 	float ComputeSpecularComponent(Color &color, const Vector3 &in, const Vector3 &out, const Intersection &hit) {
-		float top = sqrt((RoughnessU + 1) * (RoughnessV + 1));
-		Vector3 h = in + out;
+		Vector3 h, projectionH;
+		float top, phi;
+
+		//calculate top of equation:
+		top = sqrt((RoughnessU + 1) * (RoughnessV + 1));
+		h = in + out;
 		h.Normalize();
-		float theta = 30; //TODO: HOW DO YOU CALCULATE THETA
-		top *= pow(hit.Normal.Dot(h), (RoughnessU * cos(theta) * cos(theta) + RoughnessV * sin(theta) * sin(theta)));
+
+		//find projection of h on plane
+		projectionH.Cross(h, hit.Normal);
+		projectionH.Cross(hit.Normal, projectionH); //find projection
+		projectionH.Normalize();
+
+		//find angle between projectionH and TangentU vector:
+		phi = acos(hit.TangentU.Dot(projectionH));
+		top *= pow(hit.Normal.Dot(h), (RoughnessU * cos(phi) * cos(phi) + RoughnessV * sin(phi) * sin(phi)));
 		
 		float bottom = 8 * PI;
 		bottom *= (h.Dot(in) * Max(hit.Normal.Dot(in), hit.Normal.Dot(out)));
 
 	}
 
-	float FresnelReflectance(const Vector3 &in, const Vector3 &out, const Intersection &hit) {
-		
+	Color FresnelReflectance(float inCrossH) {
+		//Color InverseSpecularColor = Color()
+		//return SpecularColor + ((1 - SpecularColor) )
 	}
 
 	void GenerateSample() {
