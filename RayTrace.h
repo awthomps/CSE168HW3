@@ -64,13 +64,13 @@ public:
 				if (!shadowRayBlocked) {
 					Color shade = lightColor;
 					float dotResult = (toLight).Dot(hit.Normal);
-					shade.Scale(((dotResult < 0) ? 0 : dotResult) * intensity);
+					shade.Scale(((dotResult < 0) ? 0 : dotResult) * intensity * PI);
 
 
 					Ray reflectedRay;
 					reflectedRay.Origin = hit.Position;
 					if (hit.Mtl != NULL) {
-						hit.Mtl->ComputeReflectance(shade, sentRay.Direction, reflectedRay.Direction, hit);
+						hit.Mtl->ComputeReflectance(shade, -sentRay.Direction, toLight, hit);
 					}
 					//add this lighting to the pixel
 					hit.Shade.Add(shade);

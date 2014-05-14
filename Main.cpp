@@ -210,7 +210,7 @@ void project3() {
 	cam.SetFOV(40.0f);
 	cam.SetAspect(1.33f);
 	cam.SetResolution(800, 600);
-	cam.SetSuperSample(10);
+	//cam.SetSuperSample(10);
 
 	// Render image
 	cam.Render(scn);

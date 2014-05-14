@@ -9,12 +9,26 @@ class AshikhminMaterial :
 {
 public:
 	void ComputeReflectance(Color &color, const Vector3 &in, const Vector3 &out, const Intersection &hit) {
-		
+		Color Rho, specular, diffuse;
+		Rho = Color(0.0f, 0.0f, 0.0f);
+		specular = SpecularColor;
+		specular.Scale(ComputeSpecularComponent(in, out, hit));
+		//specular.getInVector3().Print("Specular");
+		diffuse = DiffuseColor;
+		diffuse.Scale(ComputeDiffuseComponent(in, out, hit));
+		//diffuse.getInVector3().Print("Diffuse");
+		Rho.Add(specular);
+		Rho.Add(diffuse);
+
+		//Rho.getInVector3().Print("Before 1/PI scale");
+		//color.getInVector3().Print("current color");
+		color.Multiply(Rho); // may not want to scale
+		//color.getInVector3().Print("After 1/PI Scale");
 	}
 
-	float ComputeSpecularComponent(Color &color, const Vector3 &in, const Vector3 &out, const Intersection &hit) {
+	float ComputeSpecularComponent(const Vector3 &in, const Vector3 &out, const Intersection &hit) {
 		Vector3 h, projectionH;
-		float top, phi;
+		float top, phi, hDotK;
 
 		//calculate top of equation:
 		top = sqrt((RoughnessU + 1) * (RoughnessV + 1));
@@ -30,18 +44,27 @@ public:
 		phi = acos(hit.TangentU.Dot(projectionH));
 		top *= pow(hit.Normal.Dot(h), (RoughnessU * cos(phi) * cos(phi) + RoughnessV * sin(phi) * sin(phi)));
 		
-		float bottom = 8 * PI;
+		float bottom = 8.0 * PI;
 		bottom *= (h.Dot(in) * Max(hit.Normal.Dot(in), hit.Normal.Dot(out)));
 
+		return FresnelReflectance(in.Dot(h)) * top / bottom;
 	}
 
-	Color FresnelReflectance(float inCrossH) {
-		//Color InverseSpecularColor = Color()
-		//return SpecularColor + ((1 - SpecularColor) )
+	float FresnelReflectance(float inDotH) {
+		return SpecularLevel + ((1.0 - SpecularLevel) * pow((inDotH), 5.0));
+	}
+
+	float ComputeDiffuseComponent(const Vector3 &in, const Vector3 &out, const Intersection &hit) {
+		float accumulation;
+		accumulation = 28.0 * DiffuseLevel / (23.0 * PI);
+		accumulation *= (1 - SpecularLevel);
+		accumulation *= (1 - pow(1 - (hit.Normal.Dot(in) / 2.0), 5.0));
+		accumulation *= (1 - pow(1 - (hit.Normal.Dot(out) / 2.0), 5.0));
+		return accumulation;
 	}
 
 	void GenerateSample() {
-
+		
 	}
 
 	void SetSpecularLevel(float level) { SpecularLevel = level; }

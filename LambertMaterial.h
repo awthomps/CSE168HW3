@@ -12,10 +12,10 @@
 class LambertMaterial:public Material {
 public:
 	void ComputeReflectance(Color &col, const Vector3 &in, const Vector3 &out, const Intersection &hit) {
-		col.Scale(DiffuseColor,1.0f/PI);
+		col.Multiply(Color(DiffuseColor.getInVector3() * 1.0f/PI));
 	}
 
-	void GenerateSample() {
+	Vector3 GenerateSample(const Vector3 &in, const Intersection &hit) {
 
 	}
 	
