@@ -42,7 +42,13 @@ public:
 
 		//find angle between projectionH and TangentU vector:
 		phi = acos(hit.TangentU.Dot(projectionH));
-		top *= pow(hit.Normal.Dot(h), (RoughnessU * cos(phi) * cos(phi) + RoughnessV * sin(phi) * sin(phi)));
+		float hu, hv, hn;
+		hu = h.Dot(hit.TangentU);
+		hv = h.Dot(hit.TangentV);
+		hn = h.Dot(hit.Normal);
+		float exponent = (RoughnessU * hu * hu) + (RoughnessV * hv * hv);
+		exponent /= (1 - (hn * hn));
+		top *= pow(hit.Normal.Dot(h), exponent);
 		
 		float bottom = 8.0 * PI;
 		bottom *= (h.Dot(in) * Max(hit.Normal.Dot(in), hit.Normal.Dot(out)));
