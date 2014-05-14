@@ -12,6 +12,7 @@
 class Material {
 public:
 	virtual void ComputeReflectance(Color &col, const Vector3 &in, const Vector3 &out, const Intersection &hit)=0;
+	virtual void GenerateSample(Color &color, Vector3 &sample, const Vector3 &in, const Intersection &hit) = 0;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

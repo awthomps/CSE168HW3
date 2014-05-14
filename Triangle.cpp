@@ -79,6 +79,7 @@ bool Triangle::Intersect(const Ray &ray, Intersection &hit) const {
 
 	//tangent:
 	hit.TangentU.Cross(Vector3::YAXIS, hit.Normal);
+	if (hit.TangentU.x == 0.0f, hit.TangentU.y == 0.0f, hit.TangentU.z == 0.0f) hit.TangentU.Cross(Vector3::ZAXIS, hit.Normal);
 	hit.TangentU.Normalize();
 	hit.TangentV.Cross(hit.Normal, hit.TangentU);
 

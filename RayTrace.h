@@ -8,7 +8,7 @@
 #include "Scene.h"
 
 
-#define MAX_DEPTH 2
+#define MAX_DEPTH 10
 
 struct ShadowRay {
 	Ray ray;
@@ -67,8 +67,7 @@ public:
 					shade.Scale(((dotResult < 0) ? 0 : dotResult) * intensity * PI);
 
 
-					Ray reflectedRay;
-					reflectedRay.Origin = hit.Position;
+					
 					if (hit.Mtl != NULL) {
 						hit.Mtl->ComputeReflectance(shade, -sentRay.Direction, toLight, hit);
 					}
@@ -78,6 +77,23 @@ public:
 			}
 
 			if (depth == MAX_DEPTH) return true;
+
+			//Compute shade due to reflections/refractions:
+			if (hit.Mtl != NULL) {
+				Ray reflectedRay;
+				Intersection newHit;
+				Color surfaceColor;
+				float newIntensity;
+
+				reflectedRay.Origin = hit.Position;
+				hit.Mtl->GenerateSample(surfaceColor, reflectedRay.Direction, -sentRay.Direction, hit);
+				
+				TraceRay(reflectedRay, newHit, depth + 1);
+				newHit.Shade.Multiply(surfaceColor);
+				newHit.Shade.Scale(1 / PI);
+				hit.Shade.Add(newHit.Shade);
+			}
+			else std::cout << "This object has no material!" << std::endl;
 
 			return true;
 		}
