@@ -33,7 +33,7 @@ public:
 		coordinateSpace.b = hit.Normal;
 		coordinateSpace.c = hit.TangentV;
 		coordinateSpace.d = Vector3(0.0f, 0.0f, 0.0f);
-		coordinateSpace.Transform(preTrans, sample);
+		coordinateSpace.Transform3x3(preTrans, sample);
 		//color = DiffuseColor;
 		Vector3 inCrossN = in;
 		inCrossN.Cross(in, hit.Normal);

@@ -59,43 +59,65 @@ public:
 	}
 
 	void GenerateSample(Color &color, Vector3 &sample, const Vector3 &in, const Intersection &hit) {
-		float theta, phi, epsilon1, epsilon2, epsilon3, exponent, r, s;
+		float costheta, phi, sintheta, epsilon1, epsilon2, epsilon3, exponent, r, s;
 
-		epsilon1 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		phi = atan(sqrt((RoughnessU + 1) / (RoughnessV + 1)) * tan(PI * epsilon1 / 2.0));
-
-		epsilon2 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		exponent = 1 / ((RoughnessU * cos(phi) * cos(phi)) + (RoughnessV * sin(phi) * sin(phi)) + 1);
-		theta = acos(pow((1 - epsilon2), exponent));
-
-		epsilon3 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		Vector3 h, sampleH = Vector3(sin(theta) * cos(phi), cos(theta), sin(theta) * sin(phi));
-		sampleH.Normalize(); //just in case...
-		if (epsilon3 < 0.5) h.x = h.x * -1.0;
-		if ((0.0 <= epsilon3 && epsilon3 <= 0.25) || (0.5 <= epsilon3 && epsilon3 <= 0.75)) h.z = h.z * -1.0;
-
-		//orient the h vector into the surface coordinate space:
 		Matrix34 coordinateSpace;
 		coordinateSpace.a = hit.TangentU;
 		coordinateSpace.b = hit.Normal;
 		coordinateSpace.c = hit.TangentV;
 		coordinateSpace.d = Vector3(0.0f, 0.0f, 0.0f);
-		coordinateSpace.Transform(sampleH, h); // transform the vector
 
-		//create reflection vector
-		sample = -in - (2 * hit.Normal * (-in).Dot(hit.Normal));
-
+		
 		r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 		s = r * (SpecularLevel + DiffuseLevel);
+		if (r < SpecularLevel) {
+			
+			Color newColor = SpecularColor;
+			color = newColor;
 
-		if (r < SpecularLevel) color = SpecularColor;
-		else {
-			color = Vector3(0.0f, 0.0f, 0.0f);
-			Vector3 inCrossN = in;
-			inCrossN.Cross(in, hit.Normal);
-			color = DiffuseColor; //.AddScaled(DiffuseColor, cos(asin(inCrossN.Magnitude() / (in.Magnitude() * hit.Normal.Magnitude()))));
+			// Anisotropic problem where dark in places it shouldn't be
+			epsilon1 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+			phi = atan(sqrt((RoughnessU + 1) / (RoughnessV + 1)) * tan(PI * epsilon1 / 2.0));
+
+			epsilon2 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+			exponent = 1.0 / ((RoughnessU * cos(phi) * cos(phi)) + (RoughnessV * sin(phi) * sin(phi)) + 1.0);
+			costheta = pow((1 - epsilon2), exponent);
+			sintheta = sqrt(1 - costheta*costheta);
+
+			epsilon3 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+			Vector3 h, sampleH = Vector3(sintheta * cos(phi), costheta, sintheta * sin(phi));
+			sampleH.Normalize(); //just in case...
+			if (epsilon3 < 0.5) h.x = h.x * -1.0;
+			if ((0.0 <= epsilon3 && epsilon3 <= 0.25) || (0.5 <= epsilon3 && epsilon3 <= 0.75)) h.z = h.z * -1.0;
+
+			//orient the h vector into the surface coordinate space:
+			coordinateSpace.Transform3x3(sampleH, h); // transform the vector
+
+			//create reflection vector
+			sample = -in + (2 * (in).Dot(h) * h);
+			if (sample.Dot(hit.Normal) < 0.0f) color = Color::BLACK; //check if valid sample
+			
 		}
-		//color.Scale(1 / PI);
+		else {
+			Color newColor = DiffuseColor;
+			color = DiffuseColor; //.AddScaled(DiffuseColor, cos(asin(inCrossN.Magnitude() / (in.Magnitude() * hit.Normal.Magnitude()))));
+
+			//perform hemisphere sample
+			float s, t, u, v;
+			Vector3 preTrans;
+			s = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+			u = 2.0f * PI * s;
+			t = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+			v = sqrt(1.0 - t);
+
+			preTrans.x = v * cos(u);
+			preTrans.y = sqrt(t);
+			preTrans.z = v * sin(u);
+
+			//orient the h vector into the surface coordinate space:
+			coordinateSpace.Transform3x3(preTrans, sample);
+		}
+		
 	}
 
 	void SetSpecularLevel(float level) { SpecularLevel = level; }

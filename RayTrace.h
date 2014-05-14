@@ -34,12 +34,14 @@ public:
 			return false;
 		}
 		else {
+			hit.Shade = Color::BLACK;
 			for (unsigned int i = 0; i < Scn->GetNumLights(); ++i) {
 				//declare locals:
 				Color lightColor, shade;
 				Vector3 toLight, lightPos, in, out;
 				Intersection obstruction;
 				Ray toLightRay;
+				
 
 				//compute lighting with this light 
 				float intensity = Scn->GetLight(i).Illuminate(hit.Position, lightColor, toLight, lightPos);
@@ -87,10 +89,14 @@ public:
 
 				reflectedRay.Origin = hit.Position;
 				hit.Mtl->GenerateSample(surfaceColor, reflectedRay.Direction, -sentRay.Direction, hit);
-				
+				if (surfaceColor.equals(Color::BLACK)) return false;
+
 				TraceRay(reflectedRay, newHit, depth + 1);
+				
+
+				//surfaceColor.Scale(1 / PI);
 				newHit.Shade.Multiply(surfaceColor);
-				newHit.Shade.Scale(1 / PI);
+				//newHit.Shade.Scale(1 / PI);
 				hit.Shade.Add(newHit.Shade);
 			}
 			else std::cout << "This object has no material!" << std::endl;

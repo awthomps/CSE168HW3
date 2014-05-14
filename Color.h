@@ -25,6 +25,8 @@ public:
 	void Multiply(const Color c)			{Red*=c.Red; Green*=c.Green; Blue*=c.Blue;}
 	Vector3 getInVector3()					{ return Vector3(Red, Green, Blue); }
 
+	bool equals(Color c) { return (Red == c.Red && Green == c.Green && Blue == c.Blue); }
+
 	int ToInt() {
 		int r=(Red<0) ? 0 : ((Red>=1.0) ? 255 : int(Red*256.0f));
 		int g=(Green<0) ? 0 : ((Green>=1.0) ? 255 : int(Green*256.0f));
